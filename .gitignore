@@ -1,0 +1,21 @@
+# Dependencias
+node_modules/
+
+# Binarios de terceros: se preparan con desktop/scripts/prepare-tools.ps1
+desktop/bin/
+
+# Salidas de build y pruebas
+dist/
+desktop/qa/artifacts/
+desktop/qa/*-report.json
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secretos (Recorder no usa ninguno; por si acaso)
+.env
+.env.*
+*.pem

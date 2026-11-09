@@ -1,0 +1,16 @@
+{
+  "url": "http://127.0.0.1:3000",
+  "browser": "msedge",
+  "title": "Crear un cliente",
+  "width": 1280,
+  "height": 720,
+  "format": "mp4",
+  "steps": [
+    { "action": "fill", "target": { "role": "textbox", "name": "Nombre" }, "value": "Cliente Demo" },
+    { "action": "click", "target": { "role": "button", "name": "Crear cliente" } },
+    { "action": "expectText", "target": { "role": "status" }, "text": "Cliente creado" },
+    { "action": "frame", "target": { "role": "status" }, "label": "Resultado", "padding": 16 },
+    { "action": "screenshot" },
+    { "action": "hold", "milliseconds": 1500 }
+  ]
+}

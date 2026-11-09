@@ -1,0 +1,28 @@
+name: Calidad desktop
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: calidad-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  calidad:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci --prefix desktop
+      - run: node desktop/node_modules/electron/install.js
+      - run: npm run check
+      - run: npm --prefix desktop audit
+      - name: Motor con dispositivos sintéticos
+        run: npm --prefix desktop run test:engine

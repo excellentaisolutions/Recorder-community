@@ -1,0 +1,21 @@
+{
+  "title": "Pedido: cliente y administración",
+  "views": [
+    { "id": "cliente", "label": "CLIENTE", "url": "http://127.0.0.1:3000/cliente", "setup": [] },
+    { "id": "admin", "label": "ADMINISTRACIÓN", "url": "http://127.0.0.1:3000/admin", "setup": [] }
+  ],
+  "browser": "msedge",
+  "width": 960,
+  "height": 540,
+  "layout": "horizontal",
+  "steps": [
+    { "action": "hold", "view": "cliente", "milliseconds": 1000 },
+    { "action": "parallel", "steps": [
+      { "action": "expectText", "view": "admin", "target": { "role": "status" }, "text": "Pedidos: 1" },
+      { "action": "click", "view": "cliente", "target": { "role": "button", "name": "Crear pedido" } }
+    ] },
+    { "action": "frame", "view": "admin", "target": { "role": "status" }, "label": "Pedido recibido" },
+    { "action": "screenshot", "view": "admin" },
+    { "action": "hold", "view": "admin", "milliseconds": 2500 }
+  ]
+}

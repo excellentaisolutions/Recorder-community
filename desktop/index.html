@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'">
+  <title>Recorder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-screen" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v11H3Z"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="m3 9 4 0 5-4v14l-5-4H3Zm13-2a7 7 0 0 1 0 10m3-13a11 11 0 0 1 0 16"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="m16 10 6-4v12l-6-4"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 10v7m0-11v1"/></symbol>
+    <symbol id="i-region" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 8h8v8H8Z"/></symbol>
+    <symbol id="i-window" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 8h18m-14-3v1m3-1v1"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="3"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+  </defs></svg>
+  <header class="titlebar"><div class="brand"><span class="brand-mark"></span>Recorder <span class="brand-platform">WINDOWS</span></div><div class="window-controls"><button id="minimize" aria-label="Minimizar">−</button><button id="close" aria-label="Cerrar">×</button></div></header>
+  <section class="transport" aria-label="Controles de grabación">
+    <button id="source-button" class="source-button" title="Seleccionar pantalla o ventana"><svg><use id="source-icon" href="#i-screen"/></svg><span id="source-label">Seleccionar fuente</span><span class="chevron">⌄</span></button>
+    <div class="time-group"><div id="timer" class="timer">00:00:00</div><div id="record-state" class="record-state"><span class="status-dot"></span>Listo para grabar</div></div>
+    <div class="quick-controls"><button id="speaker-toggle" class="icon-button active" title="Audio del sistema" aria-label="Audio del sistema" aria-pressed="true"><svg><use href="#i-volume"/></svg></button><button id="mic-toggle" class="icon-button" title="Micrófono" aria-label="Micrófono" aria-pressed="false"><svg><use href="#i-mic"/></svg></button><span class="separator"></span><button id="pause" class="icon-button" title="Pausar / continuar · F10" data-hotkey-title="pause" data-title="Pausar / continuar" aria-label="Pausar" disabled><svg aria-hidden="true"><use id="pause-icon" href="#i-pause"/></svg></button><button id="record" class="record-button" title="Grabar / detener · F9" data-hotkey-title="record" data-title="Grabar / detener" aria-label="Iniciar grabación"><span id="record-symbol">REC</span></button><button id="snapshot" class="icon-button" title="Capturar imagen · F11" data-hotkey-title="screenshot" data-title="Capturar imagen" aria-label="Capturar imagen"><svg><use href="#i-camera"/></svg></button></div>
+  </section>
+  <div class="workspace">
+    <nav class="sidebar" aria-label="Secciones">
+      <button class="nav-button selected" data-page="home"><svg><use href="#i-grid"/></svg>Inicio</button>
+      <button class="nav-button" data-page="general"><svg><use href="#i-settings"/></svg>General</button>
+      <button class="nav-button" data-page="fps"><svg><use href="#i-clock"/></svg>FPS</button>
+      <button class="nav-button" data-page="video"><svg><use href="#i-video"/></svg>Vídeo</button>
+      <button class="nav-button" data-page="image"><svg><use href="#i-camera"/></svg>Imagen</button>
+      <button class="nav-button" data-page="audio"><svg><use href="#i-mic"/></svg>Audio</button>
+      <button class="nav-button" data-page="integrations"><svg><use href="#i-settings"/></svg>Integraciones IA</button>
+      <button class="nav-button nav-about" data-page="about"><svg><use href="#i-info"/></svg>Acerca de</button>
+      <div class="local-badge"><span></span>Grabación local</div>
+    </nav>
+    <main>
+      <section id="page-home" class="page">
+        <div class="page-heading"><div><div class="eyebrow">TU ESPACIO DE CAPTURA</div><h1>Todo empieza con REC.</h1></div><span class="key-badge" data-hotkey="record">F9</span></div>
+        <p class="muted intro">Elige qué quieres grabar. Tú decides cuándo empieza.</p>
+        <div class="mode-grid" role="group" aria-label="Modo de grabación">
+          <button class="mode-card selected" data-mode="screen"><svg><use href="#i-screen"/></svg><strong>Pantalla</strong><span>Escritorio completo</span></button>
+          <button class="mode-card" data-mode="window"><svg><use href="#i-window"/></svg><strong>Ventana</strong><span>Una aplicación</span></button>
+          <button class="mode-card" data-mode="region"><svg><use href="#i-region"/></svg><strong>Área</strong><span>Un encuadre a medida</span></button>
+          <button class="mode-card" data-mode="device"><svg><use href="#i-video"/></svg><strong>Cámara</strong><span>Webcam o capturadora</span></button>
+          <button class="mode-card" data-mode="audio"><svg><use href="#i-mic"/></svg><strong>Solo audio</strong><span>Sistema y micrófono</span></button>
+          <button class="mode-card" data-mode="scene"><svg><use href="#i-grid"/></svg><strong>Múltiples</strong><span>2–4 fuentes</span></button>
+        </div>
+        <div class="source-strip"><div><span class="small-label">FUENTE ACTUAL</span><strong id="selected-source">Ninguna fuente seleccionada</strong><span id="selection-status" class="selection-status" aria-live="polite">Selecciona una fuente</span><p id="selection-details" class="selection-details" hidden></p></div><button id="choose-source" class="secondary">Seleccionar</button></div>
+        <div class="library-heading"><h2>Mis grabaciones</h2><div><select id="library-filter" aria-label="Filtrar archivos"><option value="all">Todos los archivos</option><option value="video">Vídeos</option><option value="image">Imágenes</option><option value="audio">Audio</option></select><button id="refresh-library" class="text-button">Actualizar</button></div></div>
+        <div id="library" class="library" aria-live="polite"><div class="empty-state"><svg><use href="#i-folder"/></svg><strong>Aquí vivirán tus capturas</strong><span>Graba tu primer vídeo o captura una imagen.</span></div></div>
+      </section>
+      <section id="page-general" class="page" hidden>
+        <div class="eyebrow">TU FORMA DE TRABAJAR</div><h1>General</h1>
+        <div class="settings-card"><h2>Carpeta de salida</h2><p class="muted">Los archivos se guardan en tu equipo.</p><div class="folder-field"><code id="output-folder">Cargando…</code><button id="choose-folder" class="secondary">Cambiar</button><button id="open-folder" class="secondary">Abrir</button></div></div>
+        <div class="settings-card"><h2>Control de grabación</h2><label class="field-row"><span>Cuenta atrás</span><select data-setting="countdown"><option value="0">Sin cuenta atrás</option><option value="1">1 segundo</option><option value="2">2 segundos</option><option value="3">3 segundos</option><option value="4">4 segundos</option><option value="5">5 segundos</option><option value="6">6 segundos</option><option value="7">7 segundos</option><option value="8">8 segundos</option><option value="9">9 segundos</option><option value="10">10 segundos</option></select></label><div class="field-row auto-stop-row"><span id="auto-stop-label">Detener automáticamente <small id="auto-stop-help">00:00:00 para grabar sin límite · máximo 24 horas</small></span><div class="duration-fields" role="group" aria-labelledby="auto-stop-label" aria-describedby="auto-stop-help"><label><span>Horas</span><input data-duration="hours" type="number" min="0" max="24" step="1" value="0"></label><span aria-hidden="true">:</span><label><span>Minutos</span><input data-duration="minutes" type="number" min="0" max="59" step="1" value="0"></label><span aria-hidden="true">:</span><label><span>Segundos</span><input data-duration="seconds" type="number" min="0" max="59" step="1" value="0"></label></div></div><label class="field-row"><span>Minimizar al iniciar</span><input data-setting="minimizeOnStart" type="checkbox"></label></div>
+        <div class="settings-card"><h2>Programar una grabación</h2><p class="muted">Mantén Recorder abierto y el equipo despierto. Se utilizarán la fuente y los ajustes actuales.</p><div class="schedule-row"><input id="schedule-time" type="datetime-local" aria-label="Fecha y hora de grabación"><button id="schedule-button" class="secondary">Programar</button><button id="cancel-schedule" class="text-button" hidden>Cancelar</button></div><p id="schedule-status" class="muted"></p></div>
+        <div id="hotkeys-card" class="settings-card"><div class="hotkeys-heading"><div><h2>Atajos de teclado</h2><p class="muted">Funcionan en todo el sistema, aunque Recorder esté minimizado. Si una combinación choca con Windows, un juego u otra aplicación, cámbiala aquí.</p></div><button id="hotkeys-reset" class="text-button" disabled>Restablecer todos</button></div><div class="hotkey-list"></div></div>
+      </section>
+      <section id="page-fps" class="page" hidden>
+        <div class="eyebrow">MOVIMIENTO A TU RITMO</div><h1>Fotogramas por segundo</h1>
+        <div class="settings-card"><h2>Frecuencia de captura</h2><label class="field-row"><span>FPS de grabación</span><select data-setting="fps"><option value="24">24 FPS</option><option value="30">30 FPS</option><option value="60">60 FPS</option></select></label><p class="muted">30 FPS es adecuado para tutoriales. 60 FPS ofrece mayor fluidez y requiere más recursos.</p></div>
+        <div class="notice"><svg><use href="#i-info"/></svg><p>La frecuencia seleccionada es el objetivo de captura. La frecuencia efectiva depende de la fuente y del rendimiento del equipo. Este ajuste no modifica los FPS de los juegos.</p></div>
+      </section>
+      <section id="page-video" class="page" hidden>
+        <div class="eyebrow">IMAGEN, CALIDAD Y COMPOSICIÓN</div><h1>Vídeo</h1>
+        <div class="settings-card"><h2>Formato de salida</h2><label class="field-row"><span>Contenedor</span><select data-setting="videoFormat"><option value="mp4">MP4</option><option value="webm">WebM</option><option value="mkv">MKV</option><option value="avi">AVI</option></select></label><label class="field-row"><span>Códec para MP4 y MKV</span><select data-setting="codec"><option value="h264">H.264 · compatible</option><option value="hevc">HEVC · compacto</option><option value="av1">AV1 · alta compresión</option></select></label><label class="field-row"><span>Calidad</span><select data-setting="quality"><option value="high">Alta</option><option value="balanced">Equilibrada</option><option value="small">Archivo pequeño</option></select></label><p class="muted">WebM conserva la captura original. Otros formatos se exportan al detener; HEVC y AV1 pueden tardar más.</p></div>
+        <div class="settings-card"><h2>Superposiciones</h2><label class="field-row"><span>Incluir webcam en la esquina</span><input data-setting="webcamOverlay" type="checkbox"></label><label class="field-row"><span>Cámara</span><select data-setting="cameraId" class="camera-select"><option value="">Predeterminada</option></select></label><label class="stacked-field"><span>Texto sobre el vídeo</span><input data-setting="textOverlay" type="text" maxlength="150" placeholder="Opcional · tu nombre, una nota…"></label><button id="refresh-cameras" class="text-button">Detectar cámaras</button></div>
+      </section>
+      <section id="page-image" class="page" hidden>
+        <div class="eyebrow">UN INSTANTE, GUARDADO</div><h1>Capturas de imagen</h1>
+        <div class="settings-card"><h2>Formato de imagen</h2><label class="field-row"><span>Guardar como</span><select data-setting="screenshotFormat"><option value="png">PNG · sin pérdida</option><option value="jpeg">JPEG · más ligero</option></select></label><p class="muted">La captura utiliza la fuente y el área seleccionadas. También puedes hacerla mientras grabas vídeo.</p><button id="take-screenshot" class="primary">Capturar imagen <kbd data-hotkey="screenshot">F11</kbd></button></div>
+      </section>
+      <section id="page-audio" class="page" hidden>
+        <div class="eyebrow">QUE TAMBIÉN SE ESCUCHE</div><h1>Audio</h1>
+        <div class="settings-card"><h2>Fuentes de sonido</h2><label class="field-row"><span>Sonido del sistema <small>El audio que reproduce Windows</small></span><input data-setting="systemAudio" type="checkbox" checked></label><label class="field-row"><span>Micrófono <small>Se mezcla con el sonido del sistema</small></span><input data-setting="microphone" type="checkbox"></label><label class="field-row"><span>Dispositivo de entrada</span><select data-setting="microphoneId" class="microphone-select"><option value="">Predeterminado</option></select></label><button id="refresh-devices" class="text-button">Detectar micrófonos</button></div>
+        <div class="settings-card"><h2>Modo solo audio</h2><label class="field-row"><span>Formato de salida</span><select data-setting="audioFormat"><option value="mp3">MP3</option><option value="wav">WAV</option><option value="webm">WebM · original</option></select></label><button id="audio-mode" class="secondary">Seleccionar modo solo audio</button></div>
+      </section>
+      <section id="page-integrations" class="page" hidden>
+        <div class="eyebrow">RECORDER COMO HERRAMIENTA</div><h1>Integraciones IA</h1>
+        <p class="muted">Grabaciones, demos multipantalla, narración y montaje mediante agentes locales. Los archivos se guardan en tu equipo.</p>
+        <div class="settings-card"><h2>Acceso de agentes</h2>
+          <label class="field-row"><span>Permitir conexiones locales<small>Solo clientes con tu clave de conexión</small></span><input id="agent-enabled" type="checkbox"></label>
+          <p id="agent-connection" class="muted" role="status">Cargando estado…</p>
+          <button id="agent-revoke" class="secondary">Revocar conexiones</button>
+        </div>
+        <div class="settings-card"><h2>Conectar un agente</h2><p class="muted">Copia esta configuración al apartado de servidores MCP de tu cliente. Necesita ejecutar programas en este equipo.</p>
+          <pre id="agent-config" class="agent-config"></pre><button id="agent-copy" class="secondary">Copiar configuración MCP</button>
+          <p class="muted">También disponible por CLI: <code>Recorder.exe --cli tools</code></p>
+        </div>
+        <div class="settings-card"><h2>Sesión y actividad</h2><p id="agent-session" class="muted" aria-live="polite">Sin sesión activa</p>
+          <button id="agent-stop" class="primary" disabled>Detener y guardar</button>
+          <p id="agent-jobs" class="muted"></p><button id="agent-cancel-jobs" class="secondary">Cancelar tareas IA</button>
+          <ol id="agent-activity" class="agent-activity"></ol>
+        </div>
+      </section>
+      <section id="page-about" class="page" hidden>
+        <div class="about-logo"><span class="brand-mark"></span></div><h1>Recorder</h1><p class="about-tagline">Tu pantalla. Tu historia. En tu equipo.</p><span class="version-tag">Windows · 1.1.1</span>
+        <div class="settings-card"><h2>Software libre y local</h2><p class="muted">Grabación de pantalla, ventanas, áreas, cámaras y audio, con pausa, capturas y exportación local. Sin cuentas, sin telemetría y sin subidas: los archivos se quedan en tu equipo.</p><p class="muted">La captura de juegos utiliza pantalla o ventana, sin inyectar código en el juego. Contenido protegido y ventanas que bloquean la captura pueden aparecer en negro.</p></div>
+        <div class="settings-card"><h2>Licencias</h2><p class="muted">Recorder es software libre bajo licencia Apache 2.0. Incluye FFmpeg (GPLv3), Electron y Chromium, cada uno con su propia licencia; los avisos completos están en la carpeta <code>licenses</code> de la instalación.</p></div>
+        <p class="muted">Electron · Chromium · FFmpeg</p>
+      </section>
+    </main>
+  </div>
+  <footer><span id="footer-status"><span class="status-dot"></span>Listo</span><span id="footer-format">MP4 · H.264 · 30 FPS</span></footer>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="sources-dialog"><div class="dialog-heading"><div><h2>Elige tu fuente</h2><p class="muted" id="source-help">Selecciona una pantalla para grabar.</p></div><button class="dialog-close" aria-label="Cerrar selector">×</button></div>
+    <div class="source-tools"><input id="source-search" type="search" placeholder="Buscar pantalla, aplicación o navegador" aria-label="Buscar fuente"><label><input id="combine-sources" type="checkbox"> Combinar fuentes</label></div>
+    <div id="scene-tools" class="source-tools" hidden><select id="scene-layout" aria-label="Distribución"><option value="horizontal">Lado a lado</option><option value="vertical">Una sobre otra</option><option value="grid">Cuadrícula</option></select><button id="all-screens" class="secondary">Todas las pantallas</button><span id="scene-count" class="muted"></span></div>
+    <div id="sources-grid" class="sources-grid"></div><div class="dialog-footer"><button id="refresh-sources" class="secondary">Actualizar fuentes</button><button id="confirm-scene" class="primary" hidden>Usar composición</button><button class="dialog-close secondary">Cancelar</button></div></dialog>
+  <dialog id="region-dialog"><div class="dialog-heading"><div><h2>Encuadra tu captura</h2><p class="muted">Arrastra sobre la imagen para seleccionar el área.</p></div><button class="dialog-close" aria-label="Cerrar área">×</button></div><div id="region-stage"><img id="region-image" alt="Vista previa de la pantalla"><div id="region-selection"></div></div><div class="dialog-footer"><span id="region-size" class="muted">Sin área seleccionada</span><button id="confirm-region" class="primary" disabled>Usar esta área</button></div></dialog>
+  <script type="module" src="renderer.js"></script>
+</body>
+</html>

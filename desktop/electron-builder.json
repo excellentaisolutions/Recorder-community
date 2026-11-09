@@ -1,0 +1,17 @@
+{
+  "appId": "io.github.recorder.desktop",
+  "productName": "Recorder",
+  "copyright": "Copyright 2026 Oscar Garcia · Apache-2.0",
+  "directories": { "output": "../dist" },
+  "win": { "target": "nsis", "icon": "assets/recorder.ico", "signAndEditExecutable": false },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerLanguages": ["es_ES"],
+    "language": "3082",
+    "license": "../LICENSE",
+    "shortcutName": "Recorder",
+    "artifactName": "Recorder-Setup-${version}-x64.${ext}"
+  }
+}

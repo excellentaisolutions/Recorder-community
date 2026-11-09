@@ -1,0 +1,42 @@
+{
+  "name": "recorder-desktop",
+  "version": "1.1.1",
+  "private": true,
+  "description": "Estudio de grabacion de pantalla, camara y audio para Windows",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "package": "node scripts/package.mjs",
+    "test": "node qa/backend.cjs && node qa/engine.cjs && node qa/e2e.cjs && node qa/ui.cjs && node qa/rebind.cjs && node qa/agents.cjs && node qa/multiview.cjs && node qa/visual.cjs && node qa/compatibility.cjs && node qa/selection-audit.cjs && node qa/modes-audit.cjs && node qa/service-audit.cjs",
+    "check": "node scripts/check.mjs",
+    "test:engine": "node qa/engine.cjs",
+    "test:backend": "node qa/backend.cjs",
+    "test:e2e": "node qa/e2e.cjs",
+    "test:ui": "node qa/ui.cjs",
+    "test:rebind": "node qa/rebind.cjs",
+    "test:agents": "node qa/agents.cjs",
+    "test:multiview": "node qa/multiview.cjs",
+    "test:visual": "node qa/visual.cjs",
+    "test:compatibility": "node qa/compatibility.cjs",
+    "test:selection": "node qa/selection-audit.cjs",
+    "test:modes": "node qa/modes-audit.cjs",
+    "test:service": "node qa/service-audit.cjs",
+    "installer": "node scripts/package.mjs && electron-builder --win nsis --x64 --prepackaged ../dist/Recorder-win32-x64 --config electron-builder.json"
+  },
+  "devDependencies": {
+    "@electron/packager": "20.3.0",
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "playwright": "1.65.0",
+    "zod": "^4.6.7"
+  },
+  "overrides": {
+    "glob": "^14.0.4",
+    "minimatch": "^11.0.5"
+  },
+  "license": "Apache-2.0",
+  "author": "Oscar Garcia"
+}

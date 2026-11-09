@@ -1,0 +1,14 @@
+{
+  "name": "recorder",
+  "version": "1.1.1",
+  "private": true,
+  "description": "Grabador de pantalla, cámara y audio para Windows, local y controlable por agentes de IA",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "npm --prefix desktop start",
+    "check": "npm --prefix desktop run check",
+    "test": "npm --prefix desktop test",
+    "package": "npm --prefix desktop run package",
+    "installer": "npm --prefix desktop run installer"
+  }
+}
