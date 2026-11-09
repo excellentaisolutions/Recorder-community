@@ -12,7 +12,7 @@ const defaults = { mode: 'screen', sourceId: '', fps: 30, systemAudio: true,
   microphone: false, microphoneId: '', cameraId: '', webcamOverlay: false,
   textOverlay: '', videoFormat: 'mp4', audioFormat: 'mp3', codec: 'h264',
   quality: 'balanced', countdown: 3, screenshotFormat: 'png', autoStop: 0,
-  minimizeOnStart: false, scheduleAt: '' };
+  minimizeOnStart: false, closeToTray: true, scheduleAt: '' };
 let settings = { ...defaults };
 let sources = [];
 let files = [];

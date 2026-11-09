@@ -140,12 +140,14 @@ async function probe(file) { return JSON.parse((await exec(path.join(root, 'bin/
     await delay(700);
     await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 0 }); });
     await page.locator('#close').click(); assert.equal((await call('recording.status')).state, 'recording');
+    assert.equal(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().find(w => w.webContents.getURL().endsWith('/index.html')).isVisible()), false);
+    await app.evaluate(({ app, BrowserWindow }) => { app.emit('before-quit', { preventDefault() {} }); BrowserWindow.getAllWindows().find(w => w.webContents.getURL().endsWith('/index.html')).close(); }); await delay(300); assert.equal((await call('recording.status')).state, 'recording');
     await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1 }); });
-    await page.locator('#close').click();
+    await app.evaluate(({ app, BrowserWindow }) => { app.emit('before-quit', { preventDefault() {} }); BrowserWindow.getAllWindows().find(w => w.webContents.getURL().endsWith('/index.html')).close(); });
     await until(() => appProcess.exitCode !== null);
     const savedOnClose = fs.readdirSync(output).find(file => !beforeClose.has(file) && file.endsWith('.mp4'));
     assert(savedOnClose); assert((await probe(path.join(output, savedOnClose))).streams.some(s => s.codec_type === 'video'));
-    pass('Close during recording: cancel keeps recording; save-and-close exports valid media before exit');
+    pass('Close during recording: × hides to tray; Salir asks, cancel keeps recording; save-and-close exports valid media before exit');
     assert.deepEqual(report.errors, []); report.status = 'passed';
   } catch (e) { report.status = 'failed'; report.error = e.stack; throw e; }
   finally {

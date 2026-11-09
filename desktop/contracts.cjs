@@ -11,7 +11,7 @@ const config = z.object({
   countdown: z.number().min(0).max(10).optional(),
   systemAudio: z.boolean().optional(), microphone: z.boolean().optional(),
   webcamOverlay: z.boolean().optional(), camera: z.boolean().optional(),
-  minimizeOnRecord: z.boolean().optional(),
+  minimizeOnRecord: z.boolean().optional(), closeToTray: z.boolean().optional(),
   hotkeys: z.object({ record: z.string().max(64), pause: z.string().max(64), screenshot: z.string().max(64) }).partial().optional(),
 }).catchall(z.unknown()).refine(value => JSON.stringify(value).length <= 32768, 'Configuración demasiado grande');
 const file = z.string().min(1).max(32767);

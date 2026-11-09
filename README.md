@@ -49,7 +49,7 @@ Además expone **22 herramientas por MCP y CLI** para que un agente de IA (Claud
 - Grabaciones programadas mientras la aplicación y el equipo están activos.
 - Capturas de imagen PNG o JPEG, también durante la grabación.
 - Atajos globales que funcionan con la ventana minimizada y **se pueden reasignar** (ver [Atajos de teclado](#atajos-de-teclado)).
-- Icono en la bandeja del sistema con los controles principales.
+- Icono en la bandeja del sistema con los controles principales. Al pulsar × Recorder no se cierra: sale de la barra de tareas y sigue en la bandeja; para cerrarlo, clic derecho en el icono › *Salir*. Se desactiva en General › *Cerrar a la bandeja del sistema*.
 
 **Salida**
 - MP4 y MKV con H.264, HEVC o AV1; AVI; WebM original; MP3 o WAV.

@@ -4,7 +4,7 @@ const crypto = require('node:crypto');
 const { configSchema } = require('./contracts.cjs');
 
 const mediaExtensions = new Set(['.mp4', '.webm', '.mkv', '.avi', '.mp3', '.wav', '.png', '.jpg', '.jpeg']);
-const defaults = { fps: 30, format: 'mp4', codec: 'h264', quality: 'balanced', systemAudio: true, microphone: false, camera: false, countdown: 3, autoStop: 0 };
+const defaults = { fps: 30, format: 'mp4', codec: 'h264', quality: 'balanced', systemAudio: true, microphone: false, camera: false, countdown: 3, autoStop: 0, closeToTray: true };
 
 function safeObject(value, depth = 0) {
   if (depth > 5) throw new Error('Configuración demasiado compleja.');

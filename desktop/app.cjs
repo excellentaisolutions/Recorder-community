@@ -41,11 +41,20 @@ let quitAfterSave = false;
 let closeDialogOpen = false;
 let sleepBlocker;
 let tray;
+let quitting = false;
 const pageUrl = pathToFileURL(path.join(__dirname, 'index.html')).href;
 const knownSources = new Map();
 
+function liveContents() {
+  return window && !window.isDestroyed() ? window.webContents : null;
+}
+
+function fromPage(event) {
+  return Boolean(liveContents()) && event.sender === liveContents() && event.senderFrame?.url.split('#')[0] === pageUrl;
+}
+
 function emit(channel, value) {
-  if (window && !window.isDestroyed()) window.webContents.send(channel, value);
+  liveContents()?.send(channel, value);
 }
 
 function showWindow() {
@@ -53,6 +62,17 @@ function showWindow() {
   if (window.isMinimized()) window.restore();
   window.show();
   window.focus();
+}
+
+function closesToTray() {
+  return !quitting && tray && !tray.isDestroyed() && storage.getConfig().closeToTray !== false;
+}
+
+function hideToTray() {
+  window.hide();
+  if (storage.getConfig().trayHintShown) return;
+  tray.displayBalloon({ iconType: 'info', title: 'Recorder sigue abierto', content: 'Está en la bandeja del sistema, junto al reloj. Para cerrarlo: clic derecho en el icono › Salir.' });
+  try { storage.saveConfig({ trayHintShown: true }); } catch {}
 }
 
 function withKey(text, action) {
@@ -66,19 +86,19 @@ function refreshTray() {
   const exporting = [...storage.sessions.values()].some(item => item.closed);
   tray.setToolTip(exporting ? 'Recorder — Exportando' : busy ? 'Recorder — Grabación en curso' : 'Recorder — Listo para grabar');
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Mostrar Recorder', click: showWindow },
+    liveContents() && window.isVisible() ? { label: 'Ocultar en la bandeja', click: () => window.hide() } : { label: 'Mostrar Recorder', click: showWindow },
     { type: 'separator' },
     { label: withKey(busy ? 'Detener grabación' : 'Grabar', 'record'), enabled: !exporting, click: () => emit('recorder:shortcut', 'record') },
     { label: withKey('Pausar / reanudar', 'pause'), enabled: busy && !exporting, click: () => emit('recorder:shortcut', 'pause') },
     { label: withKey('Capturar imagen', 'screenshot'), enabled: !exporting, click: () => emit('recorder:shortcut', 'screenshot') },
     { type: 'separator' },
-    { label: 'Salir', click: () => window?.close() },
+    { label: 'Salir', click: () => app.quit() },
   ]));
 }
 
 function handle(name, action) {
   ipcMain.handle(`recorder:${name}`, async (event, ...args) => {
-    if (!window || event.sender !== window.webContents || event.senderFrame?.url.split('#')[0] !== pageUrl) throw new Error('Origen no autorizado.');
+    if (!fromPage(event)) throw new Error('Origen no autorizado.');
     try { return await action(...parseArgs(name, args)); }
     finally {
       if (storage?.sessions.size && sleepBlocker === undefined) sleepBlocker = powerSaveBlocker.start('prevent-app-suspension');
@@ -92,7 +112,7 @@ async function listSources() {
   const sources = await desktopCapturer.getSources({ types: ['screen', 'window'], thumbnailSize: { width: 640, height: 360 }, fetchWindowIcons: false });
   knownSources.clear();
   const displays = screen.getAllDisplays();
-  return sources.filter(source => source.id !== window?.getMediaSourceId()).map(source => {
+  return sources.filter(source => source.id !== (liveContents() && window.getMediaSourceId())).map(source => {
     knownSources.set(source.id, source);
     const display = displays.find(item => String(item.id) === source.display_id);
     const thumbnail = source.thumbnail.toDataURL();
@@ -104,6 +124,11 @@ async function listSources() {
 }
 
 async function requestClose(event) {
+  if (closesToTray()) {
+    event.preventDefault();
+    hideToTray();
+    return;
+  }
   if (!storage.isBusy() && agents?.hasRunning()) {
     event.preventDefault();
     if (closeDialogOpen) return;
@@ -119,11 +144,12 @@ async function requestClose(event) {
   closeDialogOpen = true;
   try {
     const exporting = [...storage.sessions.values()].some(item => item.closed);
+    showWindow();
     const result = await dialog.showMessageBox(window, { type: 'question', title: 'Grabación en curso', message: exporting ? 'El vídeo se está exportando. ¿Cerrar cuando termine?' : '¿Detener, guardar la grabación y cerrar?', buttons: ['Continuar trabajando', 'Guardar y cerrar'], defaultId: 0, cancelId: 0 });
     if (result.response === 1) {
       quitAfterSave = true;
       if (!exporting) emit('recorder:shortcut', 'stop');
-    }
+    } else quitting = false;
   } finally { closeDialogOpen = false; }
 }
 
@@ -133,7 +159,7 @@ function bindIpc() {
   handle('integrationCancel', () => agents.cancel());
   handle('integrationSet', options => agents.set(options));
   for (const channel of ['agentReply', 'agentState']) ipcMain.on(`recorder:${channel}`, (event, value) => {
-    if (event.sender !== window?.webContents || event.senderFrame?.url.split('#')[0] !== pageUrl) return;
+    if (!fromPage(event)) return;
     if (channel === 'agentState') {
       agentStatus = value;
       return;
@@ -200,16 +226,19 @@ async function createWindow() {
   window.webContents.on('will-navigate', event => event.preventDefault());
   window.webContents.on('did-start-loading', () => globalShortcut.setSuspended(false));
   window.on('close', requestClose);
+  window.on('show', refreshTray);
+  window.on('hide', refreshTray);
   window.once('ready-to-show', () => { if (!process.env.RECORDER_TEST_HIDDEN) window.show(); });
   await window.loadFile(path.join(__dirname, 'index.html'));
 }
 
 app.on('second-instance', showWindow);
+app.on('before-quit', () => { quitting = true; });
 
 if (ownsInstance) app.whenReady().then(async () => {
   storage = createStorage(app);
-  session.defaultSession.setPermissionRequestHandler((contents, permission, callback) => callback(contents === window?.webContents && ['media', 'display-capture'].includes(permission)));
-  session.defaultSession.setPermissionCheckHandler((contents, permission) => contents === window?.webContents && ['media', 'display-capture'].includes(permission));
+  session.defaultSession.setPermissionRequestHandler((contents, permission, callback) => callback(Boolean(liveContents()) && contents === liveContents() && ['media', 'display-capture'].includes(permission)));
+  session.defaultSession.setPermissionCheckHandler((contents, permission) => Boolean(liveContents()) && contents === liveContents() && ['media', 'display-capture'].includes(permission));
   session.defaultSession.setDisplayMediaRequestHandler((_request, callback) => {
     if (!selectedSource) return callback({});
     callback({ video: selectedSource, audio: 'loopback' });
