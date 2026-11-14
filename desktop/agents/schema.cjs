@@ -114,7 +114,7 @@ const descriptions = {
   'narration.create': 'Synthesize narration as WAV using an installed Windows voice. Defaults to a Spanish voice when available. Returns job.',
   'demo.run': 'Run a declarative Playwright demo in a separate browser. Records the browser viewport, not the desktop; no computer use. Returns job.',
   'demo.multiview': 'Record two isolated browser sessions (e.g. customer/admin) on a shared timeline. Steps target a view id; parallel groups run one action per view. Returns split-screen MP4 plus separate originals, marks and timing metadata. Setup actions run before capture.',
-  'media.compose': 'Make a new MP4 from local Recorder videos, trims/crops/titles, EAS logo, subtitles and optional local narration audio. Sources preserved. Returns job.',
+  'media.compose': 'Make a new MP4 from local Recorder videos, trims/crops/titles, optional Recorder icon, subtitles and optional local narration audio. Sources preserved. Returns job.',
 };
 const envelope = z.object({ method: z.enum(Object.keys(schemas)), params: z.record(z.string(), z.unknown()).default({}),
   client: z.string().min(1).max(80).regex(/^[a-zA-Z0-9_.-]+$/), requestId: z.string().uuid() }).strict();
