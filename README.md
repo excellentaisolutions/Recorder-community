@@ -273,6 +273,6 @@ Dónde tocar cada cosa:
 
 ## Licencia
 
-El código de Recorder se distribuye bajo la [Apache License 2.0](LICENSE). Consulta también [NOTICE](NOTICE).
+Puedes usar, modificar y distribuir Recorder, también con fines comerciales, según la [Apache License 2.0](LICENSE). Al redistribuirlo debes incluir una copia de la licencia, conservar los avisos de copyright y el contenido de [NOTICE](NOTICE), e indicar en los ficheros que modifiques que los has cambiado. La licencia no da permiso para usar los nombres ni las marcas del autor, y el software se ofrece sin garantía.
 
 Las versiones empaquetadas incluyen software de terceros con sus propias licencias, entre ellos **FFmpeg bajo GPLv3**, que se ejecuta como programa independiente. Los detalles y las obligaciones al redistribuir los binarios están en [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
