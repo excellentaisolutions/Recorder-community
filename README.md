@@ -29,6 +29,7 @@ Además expone **22 herramientas por MCP y CLI** para que un agente de IA (Claud
 - [Instalación](#instalación)
 - [Uso](#uso)
 - [Integración con agentes de IA](#integración-con-agentes-de-ia)
+- [Configuración y datos](#configuración-y-datos)
 - [Desarrollo](#desarrollo)
 - [Arquitectura](#arquitectura)
 - [Limitaciones conocidas](#limitaciones-conocidas)
@@ -63,15 +64,15 @@ Además expone **22 herramientas por MCP y CLI** para que un agente de IA (Claud
 
 ## Instalación
 
-### Opción A: instalador
+Por ahora no hay versiones publicadas en **Releases**: el instalador se genera desde el código con un solo comando.
 
-Descarga `Recorder-Setup-<versión>-x64.exe` desde la sección **Releases** del repositorio y ejecútalo. El instalador permite elegir la carpeta, no necesita permisos de administrador y crea accesos directos en el escritorio y en el menú Inicio.
+1. Prepara el entorno siguiendo [Puesta en marcha](#puesta-en-marcha).
+2. Ejecuta `npm run installer`. Genera `dist/Recorder-Setup-<versión>-x64.exe` y, de paso, la versión portable en `dist/Recorder-win32-x64/`.
+3. Ejecuta el instalador. Permite elegir la carpeta, no necesita permisos de administrador y crea accesos directos en el escritorio y en el menú Inicio. Se instala por usuario en `%LOCALAPPDATA%\Programs\Recorder` y se desinstala desde *Configuración › Aplicaciones*.
+
+Si prefieres no instalar nada, abre directamente `dist/Recorder-win32-x64/Recorder.exe` (genéralo con `npm run package`). Mantén juntos todos los archivos de esa carpeta: incluye Electron y FFmpeg, y no necesita Node.
 
 > El instalador no está firmado digitalmente, así que Windows SmartScreen puede mostrar un aviso la primera vez. Elige **Más información → Ejecutar de todas formas**.
-
-### Opción B: compilar desde el código
-
-Consulta [Desarrollo](#desarrollo).
 
 ## Uso
 
@@ -119,13 +120,34 @@ Recorder protege al resto del sistema:
 
 Incluye un *skill* listo para usar en [`desktop/agent-skill/recorder-control`](desktop/agent-skill/recorder-control/SKILL.md) y recetas de ejemplo en [`desktop/examples`](desktop/examples). La guía completa, con formatos, límites y modelo de seguridad, está en [docs/AGENTES.md](docs/AGENTES.md).
 
+## Configuración y datos
+
+Recorder no necesita claves, cuentas ni ficheros `.env`. Todo se configura desde la propia aplicación y se guarda en local:
+
+| Qué | Dónde |
+|---|---|
+| Ajustes (formato, atajos, carpeta, bandeja…) | `%APPDATA%\Recorder\settings.json` |
+| Grabaciones y capturas | `Vídeos\Recorder` por defecto; se cambia en **General**. Si no se puede escribir ahí, usa `Documentos\Recorder` |
+| Conexión local para agentes (puerto y clave) | `%APPDATA%\Recorder\agent-connection.json`. No lo compartas |
+
+Variables de entorno, pensadas para desarrollo y pruebas:
+
+| Variable | Para qué sirve |
+|---|---|
+| `RECORDER_USER_DATA` | Usa otra carpeta de datos (ajustes y conexión). Permite abrir una segunda instancia aislada, que es lo que hacen las pruebas |
+| `RECORDER_EXE` | Ruta a un `Recorder.exe` empaquetado: las pruebas se ejecutan sobre él en lugar de sobre el código |
+| `RECORDER_CLIENT` | Nombre del agente que controla Recorder. Usa uno distinto por cada controlador independiente |
+| `RECORDER_CONNECTION` | Ruta alternativa a `agent-connection.json` para el cliente MCP/CLI |
+| `RECORDER_TEST_HIDDEN` | Arranca sin mostrar la ventana (pruebas) |
+
 ## Desarrollo
 
 ### Requisitos
 
 - Windows 10/11 x64. Las pruebas se han hecho en Windows 11.
 - Node.js 24 o posterior (verificado con 24.15) y npm.
-- FFmpeg y FFprobe en el `PATH`, solo para preparar el empaquetado.
+- FFmpeg y FFprobe en el `PATH`. Recorder los usa para exportar a MP4, MKV, AVI, MP3 y WAV, también en desarrollo. Una forma de instalarlos: `winget install Gyan.FFmpeg` (después abre una terminal nueva).
+- Conexión a Internet durante la puesta en marcha: `npm ci` descarga Electron y `prepare-tools.ps1` descarga el codificador de vídeo de Playwright.
 - Edge o Chrome, solo para las demos web.
 
 ### Puesta en marcha
@@ -134,11 +156,17 @@ Incluye un *skill* listo para usar en [`desktop/agent-skill/recorder-control`](d
 git clone https://github.com/excellentaisolutions/Recorder-community.git
 cd Recorder-community
 npm ci --prefix desktop
+node desktop/node_modules/electron/install.js
 powershell -ExecutionPolicy Bypass -File desktop/scripts/prepare-tools.ps1
 npm start
 ```
 
-`prepare-tools.ps1` copia FFmpeg y FFprobe desde tu instalación a `desktop/bin/` (excluida del repositorio) junto con sus licencias, y prepara el codificador de Playwright.
+- `electron/install.js` asegura que el binario de Electron está descargado. Normalmente ya lo hace `npm ci`; repetirlo no hace daño, y la integración continua lo ejecuta igual.
+- `prepare-tools.ps1` copia FFmpeg y FFprobe desde tu instalación a `desktop/bin/` (excluida del repositorio), copia sus avisos de licencia a `desktop/licenses/` y descarga el codificador de Playwright en `desktop/bin/playwright/`.
+
+> Tras `prepare-tools.ps1`, Git puede marcar como modificados `desktop/licenses/FFmpeg-*.txt`. Si tu FFmpeg es la misma versión, solo cambian los saltos de línea: no los incluyas en tu commit. Súbelos únicamente si actualizas FFmpeg a propósito.
+
+Estos pasos se han comprobado desde un clon limpio: puesta en marcha, pruebas de interfaz e instalador.
 
 ### Scripts
 
@@ -154,9 +182,15 @@ npm start
 
 Las pruebas lanzan Electron real y necesitan una sesión de Windows interactiva. Se pueden ejecutar por separado con `npm --prefix desktop run test:<nombre>`:
 
-`backend` · `engine` · `e2e` · `ui` · `rebind` · `agents` · `multiview` · `visual` · `compatibility` · `selection` · `modes` · `service`
+`backend` · `engine` · `e2e` · `ui` · `rebind` · `tray` · `agents` · `multiview` · `visual` · `compatibility` · `selection` · `modes` · `service`
+
+Cada prueba arranca su propia instancia con una carpeta de datos temporal, así que no toca tus ajustes ni tus grabaciones. Aun así graban la pantalla de verdad: no uses el equipo mientras se ejecutan, y cierra un Recorder instalado si una prueba de atajos se queja de teclas ocupadas.
 
 `RECORDER_EXE=<ruta a Recorder.exe>` repite las pruebas sobre una versión ya empaquetada. Los resultados y las capturas quedan en `desktop/qa/artifacts/`, que no se sube al repositorio.
+
+### Integración continua
+
+Cada *push* a `main` y cada *pull request* ejecutan [`.github/workflows/calidad.yml`](.github/workflows/calidad.yml) en `windows-latest`: `npm ci`, `npm run check`, `npm audit` y la prueba del motor con dispositivos sintéticos. El resto de pruebas necesitan una sesión de escritorio con pantalla y se ejecutan en local.
 
 ### Estructura
 
@@ -172,8 +206,11 @@ Recorder-community/
 │   ├── agents/                          # Servicio local, MCP, CLI, demos, voz y montaje
 │   ├── agent-skill/                     # Skill portable para agentes
 │   ├── examples/                        # Recetas de demo
+│   ├── assets/, licenses/               # Iconos y avisos de terceros
 │   ├── qa/                              # Pruebas automáticas
-│   └── scripts/                         # Preparación y empaquetado
+│   ├── scripts/                         # Preparación y empaquetado
+│   └── electron-builder.json            # Configuración del instalador NSIS
+├── .github/workflows/                   # Integración continua
 ├── docs/                                # Guía de agentes e imágenes
 ├── LICENSE, NOTICE, THIRD-PARTY-NOTICES.md
 └── package.json
@@ -218,8 +255,21 @@ Ideas abiertas a contribución:
 
 1. Abre una *issue* para comentar el cambio antes de empezar si es grande.
 2. Haz un *fork*, crea una rama y mantén el estilo existente (JavaScript sin dependencias de UI, módulos pequeños).
-3. Pasa `npm run check` y las pruebas relacionadas con tu cambio.
-4. Abre el *pull request* explicando qué cambia, por qué y cómo lo has probado.
+3. Pasa `npm run check` y las pruebas relacionadas con tu cambio. Si tocas la interfaz, `test:ui` y `test:visual`; si tocas las herramientas de agentes, `test:agents` y `test:service`.
+4. Si el cambio añade o cambia una capacidad, actualiza en el mismo *pull request* este README y, si afecta a los agentes, [docs/AGENTES.md](docs/AGENTES.md) y el [skill](desktop/agent-skill/recorder-control/SKILL.md).
+5. Abre el *pull request* explicando qué cambia, por qué y cómo lo has probado.
+
+Dónde tocar cada cosa:
+
+| Quiero cambiar… | Empieza por |
+|---|---|
+| La interfaz | `desktop/index.html`, `desktop/styles.css`, `desktop/renderer.js` |
+| Cómo se graba | `desktop/recording.js`, `desktop/controller.js`, `desktop/scene.js` |
+| La exportación | `desktop/exporter.cjs` |
+| Ajustes y archivos | `desktop/storage.cjs`, `desktop/contracts.cjs` (validación) |
+| Atajos | `desktop/hotkeys.cjs` (registro) y `desktop/hotkeys.js` (pantalla de ajustes) |
+| Una herramienta para agentes | `desktop/agents/schema.cjs` (contrato) y `desktop/agents/service.cjs` (ejecución) |
+| El instalador | `desktop/scripts/package.mjs` y `desktop/electron-builder.json` |
 
 ## Licencia
 
