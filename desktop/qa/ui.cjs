@@ -67,10 +67,11 @@ const pass = name => { report.checks.push(name); console.log(`PASS ${name}`); };
     await page.screenshot({ path: path.join(artifacts, 'general-duration.png') });
     await page.locator('[data-page="about"]').click();
     assert.match(await page.locator('#page-about').textContent(), /licencia Apache 2\.0/);
+    assert.match(await page.locator('#page-about').textContent(), /Creado por Oscar García · Excellent AI Solutions/);
     assert.equal(await page.locator('#page-about a').count(), 0);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await page.screenshot({ path: path.join(artifacts, 'about.png') });
-    pass('About page is brand-neutral, states the licences and has no external links');
+    pass('About page states the licences and the author, with no external links');
     await page.locator('[data-page="home"]').click();
 
     await page.locator('#source-button').click();
